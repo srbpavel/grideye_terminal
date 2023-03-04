@@ -11,14 +11,12 @@ use chrono::DateTime;
 use chrono::Utc;
 use chrono::Local;
 
-use uuid;
+use uuid::Uuid;
 
 use rumqttc::Client;
 use rumqttc::MqttOptions;
 use rumqttc::Packet;
 use rumqttc::QoS;
-
-use env_logger;
 
 #[allow(unused)]
 use log::info;
@@ -176,7 +174,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mqtt_uniq_id = format!("{}_{}",
             MQTT_CLIENT_ID,
-            uuid::Uuid::new_v4().simple(),
+            Uuid::new_v4().simple(),
     );
     
     let mut mqttoptions = MqttOptions::new(
@@ -224,7 +222,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .enumerate()
                     .map(|(index, chunk)| {
                         let chunk_result: Result<[u8; 4], _> = chunk.try_into();
-                        let pixel_temp = match chunk_result {
+
+                        match chunk_result {
                             Ok(value) => {
                                 let temp = f32::from_be_bytes(value);
 
@@ -263,9 +262,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                                 TEMPERATURE_ERROR_VALUE
                             },
-                        };
-
-                        pixel_temp
+                        }
                     })
                     .collect::<Vec<f32>>()
                      // trait `From<Vec<f32>>` is not implemented for `[f32; 64]`
